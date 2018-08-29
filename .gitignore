@@ -9,4 +9,3 @@ screenshots/**/*.html
 screenshots/**/*.json
 .envrc
 *.log
-.envrc
