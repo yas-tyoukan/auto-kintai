@@ -23,7 +23,7 @@ export BREAK_TIME_OUT="1400"
 ```
 npm run server
 ```
-
+serverが動いている状態で以下実行
 ```
 npm run test
 ```
