@@ -1,0 +1,17 @@
+FROM node:8.2.1-alpine
+
+RUN apk --no-cache add tzdata sudo && \
+    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+    apk del tzdata
+
+WORKDIR /app
+COPY package.json tests saveresult.js /app/
+RUN npm install --production --no-progress
+
+ENV NOROOT=octcat
+
+RUN addgroup -S $NOROOT && \
+    adduser -S -g $NOROOT $NOROOT  && \
+    echo "$NOROOT ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+USER $NOROOT

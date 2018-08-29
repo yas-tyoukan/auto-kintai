@@ -21,7 +21,22 @@ module.exports = function () {
   });
 
 
-  const {URL, LOGIN_ID, LOGIN_PASS} = process.env;
+  const {
+    URL,
+    LOGIN_ID,
+    LOGIN_PASS,
+    DATE = new Date(),
+    WORK_TIME_IN = "0900",
+    WORK_TIME_OUT = "1900",
+    BREAK_TIME_IN = "1300",
+    BREAK_TIME_OUT = "1400",
+  } = process.env;
+  const selectorOfDateButton = ((date) => {
+    const d = new Date(date);
+    const attr = `[data-date="${('0' + (d.getMonth() + 1)).slice(0, 2)}/${d.getDate()}/${d.getFullYear()}"]`;
+    return `#attendance-table-body > .work-row${attr} button${attr} > span`;
+  })(DATE);
+  console.log(URL);
 
   it(`url: ${URL}`, async function () {
     await driver.url(_(URL));
@@ -33,6 +48,9 @@ module.exports = function () {
     });
   });
 
+  it('sendKeys: LOGIN_ID{ENTER}', async function () {
+    await driver.sendKeys(`${LOGIN_ID}{ENTER}`);
+  });
 
   it('waitBody: ', async function () {
     await driver.sleep(500).wait('body', 30000).html().then(function (code) {
@@ -50,34 +68,38 @@ module.exports = function () {
     });
   });
 
-  it('scrollElementTo: #attendance-table-body, 0, 248', async function () {
-    await driver.sleep(300).wait('#attendance-table-body', 30000)
-      .sleep(300).scrollElementTo(0, 248);
+  // サインインを維持しますか？が出た時用
+  it('sendKeys: {ENTER}', async function () {
+    await driver.sendKeys(`{ENTER}`);
   });
 
-  it('scrollElementTo: #attendance-table-body, 0, 556', async function () {
-    await driver.sleep(300).wait('#attendance-table-body', 30000)
-      .sleep(300).scrollElementTo(0, 556);
-  });
-
-  it('click: 入力 ( #attendance-table-body tr:nth-child(17) > td:nth-child(16) > button[type="button"].maw-detail-button > span, 1, 8, 0 )', async function () {
-    await driver.sleep(300).wait('#attendance-table-body tr:nth-child(17) > td:nth-child(16) > button[type="button"].maw-detail-button > span', 30000)
+  // 指定された日付の"入力"ボタンをクリック
+  it(`click: 入力 ( ${selectorOfDateButton}, 1, 8, 0 )`, async function () {
+    await driver.sleep(300).wait(selectorOfDateButton, 30000)
       .sleep(300).mouseMove(1, 8).click(0);
   });
 
+  // 勤務時間開始をクリック
   it('click: #work-time-in, 33, 16, 0', async function () {
     await driver.sleep(300).wait('#work-time-in', 30000)
       .sleep(300).mouseMove(33, 16).click(0);
   });
 
-  it('sendKeys: 1000{TAB}1950{TAB}1300{TAB}13{BACK_SPACE}400{TAB}', async function () {
-    await driver.sendKeys('1000{TAB}1950{TAB}1300{TAB}13{BACK_SPACE}400{TAB}');
+  it('sendKeys: 勤怠情報入力', async function () {
+    await driver.sendKeys(`${WORK_TIME_IN}{TAB}${WORK_TIME_OUT}{TAB}${BREAK_TIME_IN}{TAB}${BREAK_TIME_OUT}`);
   });
 
   it('click: すべて承認依頼 ( //span[text()="すべて承認依頼"], 32, 0, 0 )', async function () {
     await driver.sleep(300).wait('//span[text()="すべて承認依頼"]', 30000)
       .sleep(300).mouseMove(32, 0).click(0);
   });
+
+  // 確認用
+  // it('waitBody: 1000000', async function () {
+  //   await driver.sleep(1000000).wait('body', 30000).html().then(function (code) {
+  //     isPageError(code).should.be.false;
+  //   });
+  // });
 
   function _(str) {
     if (typeof str === 'string') {

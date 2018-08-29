@@ -1,0 +1,33 @@
+version: '2'
+services:
+  hub:
+    container_name: selenium-hub
+    image: selenium/hub:3.14.0
+    ports:
+      - "4444:4444"
+  node-chrome:
+    build:
+      context: ./selenium-node/chrome
+      dockerfile: Dockerfile
+    container_name: selenium-node-chrome
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=hub
+      - HUB_PORT_4444_TCP_PORT=4444
+    depends_on:
+      - hub
+    ports:
+      - "4445:4445"
+  runner:
+    build:
+      context: ./
+      dockerfile: DockerfileBase
+    container_name: runner
+    command: sh -c "npm run test"
+    environment:
+      - webdriver=hub:4444
+    depends_on:
+      - hub
+      - node-chrome
+    volumes:
+      - ./:/app/
+      - /app/node_modules
